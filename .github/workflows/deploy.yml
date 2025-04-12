@@ -38,13 +38,13 @@ jobs:
         docker push $IMAGE_URI:latest
         echo "IMAGE_URI=$IMAGE_URI:latest" >> $GITHUB_ENV
 
-    # - name: Render ECS Task Definition
-    #   run: |
-    #     sed "s|586794471820.dkr.ecr.us-east-1.amazonaws.com/rest-api-demo:latest|${IMAGE_URI}|g" ecs-task.json > task-def.json
+    - name: Render ECS Task Definition
+      run: |
+        sed "s|<your-aws-account-id>.dkr.ecr.us-east-1.amazonaws.com/repo:latest|${IMAGE_URI}|g" ecs-task.json > task-def.json
 
-    # - name: Register new ECS task definition
-    #   run: |
-    #     aws ecs register-task-definition --cli-input-json file://task-def.json
+    - name: Register new ECS task definition
+      run: |
+        aws ecs register-task-definition --cli-input-json file://task-def.json
 
     # - name: Update ECS service
     #   run: |
