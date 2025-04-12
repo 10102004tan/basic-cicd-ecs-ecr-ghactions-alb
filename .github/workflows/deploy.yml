@@ -40,7 +40,7 @@ jobs:
 
     - name: Render ECS Task Definition
       run: |
-        sed "s|<your-aws-account-id>.dkr.ecr.us-east-1.amazonaws.com/repo:latest|${IMAGE_URI}|g" ecs-task.json > task-def.json
+        sed "s|123456789012.dkr.ecr.us-east-1.amazonaws.com/repo:latest|${IMAGE_URI}|g" ecs-task.json > task-def.json
 
     - name: Register new ECS task definition
       run: |
