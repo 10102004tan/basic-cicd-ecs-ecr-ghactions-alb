@@ -1,0 +1,54 @@
+name: Deploy to Amazon ECS
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: 10102004tan/express-server
+  ECS_CLUSTER: DevCluster
+  ECS_SERVICE: hello-world-service
+  ECS_TASK_FAMILY: task-server-express
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Login to Amazon ECR
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Build, tag, and push Docker image to ECR
+      run: |
+        IMAGE_URI=586794471820.dkr.ecr.ap-southeast-1.amazonaws.com/10102004tan/express-server
+        docker build -t $IMAGE_URI:latest .
+        docker push $IMAGE_URI:latest
+        echo "IMAGE_URI=$IMAGE_URI:latest" >> $GITHUB_ENV
+
+    # - name: Render ECS Task Definition
+    #   run: |
+    #     sed "s|586794471820.dkr.ecr.us-east-1.amazonaws.com/rest-api-demo:latest|${IMAGE_URI}|g" ecs-task.json > task-def.json
+
+    # - name: Register new ECS task definition
+    #   run: |
+    #     aws ecs register-task-definition --cli-input-json file://task-def.json
+
+    # - name: Update ECS service
+    #   run: |
+    #     NEW_REVISION=$(aws ecs describe-task-definition --task-definition $ECS_TASK_FAMILY --query 'taskDefinition.revision' --output text)
+    #     aws ecs update-service \
+    #       --cluster $ECS_CLUSTER \
+    #       --service $ECS_SERVICE \
+    #       --task-definition $ECS_TASK_FAMILY:$NEW_REVISION
